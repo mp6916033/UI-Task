@@ -1,0 +1,22 @@
+/* src/components/Task.css */
+.task {
+  background-color: #fff;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.task h4 {
+  margin: 0 0 5px 0;
+}
+
+.task p {
+  margin: 0 0 5px 0;
+}
+
+.task small {
+  color: #777;
+}

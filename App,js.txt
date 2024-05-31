@@ -1,0 +1,90 @@
+import React, { useState, useEffect } from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
+import TaskList from './components/TaskList';
+import './App.css';
+
+const App = () => {
+  const [tasks, setTasks] = useState({
+    pending: [],
+    inProgress: [],
+    completed: []
+  });
+
+  const [newTask, setNewTask] = useState({ title: '', description: '' });
+
+  useEffect(() => {
+    // Mock data for demonstration
+    setTasks({
+      pending: [{ id: '1', title: 'Task 1', description: 'Description 1' }],
+      inProgress: [{ id: '2', title: 'Task 2', description: 'Description 2' }],
+      completed: []
+    });
+  }, []);
+
+  const handleAddTask = () => {
+    if (newTask.title.trim()) {
+      const newTaskObj = {
+        id: `${Date.now()}`,
+        title: newTask.title,
+        description: newTask.description,
+        status: 'pending'
+      };
+      setTasks((prevTasks) => ({
+        ...prevTasks,
+        pending: [...prevTasks.pending, newTaskObj]
+      }));
+      setNewTask({ title: '', description: '' });
+    }
+  };
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const { source, destination } = result;
+    const sourceList = Array.from(tasks[source.droppableId]);
+    const destList = Array.from(tasks[destination.droppableId]);
+    const [movedTask] = sourceList.splice(source.index, 1);
+
+    if (destination.droppableId === 'completed' && source.droppableId !== 'completed') {
+      movedTask.timestamp = new Date().toLocaleString();
+    }
+
+    destList.splice(destination.index, 0, movedTask);
+
+    setTasks((prevTasks) => ({
+      ...prevTasks,
+      [source.droppableId]: sourceList,
+      [destination.droppableId]: destList
+    }));
+  };
+
+  return (
+    <div className="App">
+      <h1>Dynamic To-Do List</h1>
+      <div className="new-task">
+        <input
+          type="text"
+          placeholder="Task Title"
+          value={newTask.title}
+          onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Task Description"
+          value={newTask.description}
+          onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+        />
+        <button onClick={handleAddTask}>Add Task</button>
+      </div>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="task-board">
+          <TaskList tasks={tasks.pending} droppableId="pending" title="Pending" />
+          <TaskList tasks={tasks.inProgress} droppableId="inProgress" title="In Progress" />
+          <TaskList tasks={tasks.completed} droppableId="completed" title="Completed" />
+        </div>
+      </DragDropContext>
+    </div>
+  );
+};
+
+export default App;
